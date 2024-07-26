@@ -56,20 +56,22 @@ class PersonalDetailInline(admin.StackedInline):
 class FamilyMemberInline(admin.StackedInline):
     model = FamilyMember
     extra = 0
+    fields = ('full_name', 'dob', 'age_display', 'relationship')
+    readonly_fields = ('age_display',)
 
 
 class EmployeeAdmin(admin.ModelAdmin):
     list_display = ('full_name', 'date_of_birth', 'position', 'department', 'education_level')
     search_fields = ('full_name', 'position', 'department')
     inlines = [
-        ProfessionalExperienceInline,
-        PublicationInline,
-        SkillInline,
-        AwardInline,
-        CertificateInline,
-        ConferenceInline,
-        OrganizationMembershipInline,
-        PersonalDetailInline,
+        # ProfessionalExperienceInline,
+        # PublicationInline,
+        # SkillInline,
+        # AwardInline,
+        # CertificateInline,
+        # ConferenceInline,
+        # OrganizationMembershipInline,
+        # PersonalDetailInline,
         FamilyMemberInline,
     ]
 

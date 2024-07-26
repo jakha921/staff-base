@@ -1,32 +1,51 @@
 # Create your models here.
+from datetime import date
+
 from django.db import models
 
 
 class Employee(models.Model):
-    full_name = models.CharField("FIO (to'liq ism)", max_length=255)
+    full_name = models.CharField("FISH (passport buycha)", max_length=255, help_text="Familiya Ism Sharif")
     date_of_birth = models.DateField("Tug'ilgan sana")
 
     phone_number = models.CharField("Telefon raqami", max_length=20)
-    email = models.EmailField("Elektron pochta")
+    # email = models.EmailField("Elektron pochta")
     residential_address = models.TextField("Yashash manzili")
-    registration_address = models.TextField("Propiska manzili")
+    registration_address = models.TextField("Ro'yhatdan o'tgan manzili")
 
     position = models.CharField("Lavozim", max_length=255)
     department = models.CharField("Kafedra/bo'lim", max_length=255)
 
     EDUCATION_LEVELS = [
-        ('secondary', 'O\'rta maxsus'),
-        ('bachelor', 'Bakalavr'),
-        ('master', 'Magistr'),
-        ('candidate', 'Fan nomzodi'),
-        ('doctor', 'Fan doktori'),
-        ('other', 'Boshqa'),
+        ('secondary_special', 'O\'rta maxsus'),
+        ('secondary', 'O\'rta'),
+        ('higher', 'Oliy'),
     ]
     education_level = models.CharField("Ta'lim darajasi", max_length=20, choices=EDUCATION_LEVELS)
     specialty = models.CharField("Mutaxassislik", max_length=255)
     educational_institution = models.CharField("O'quv yurti", max_length=255)
     graduation_year = models.IntegerField("Bitirgan yil", blank=True, null=True)
     photo = models.ImageField("Rasm", upload_to='photos/', blank=True, null=True)
+
+    ACADEMIC_LEVEL = [
+        ('bachelor', 'Bakalavr'),
+        ('master', 'Magistr'),
+        ('phd', 'PhD'),
+        ('dsc', 'DsC')
+    ]
+
+    academic_degree = models.CharField('Ilmiy daraja', max_length=200, blank=True, null=True, choices=ACADEMIC_LEVEL)
+
+    SCIENTIFIC_TITLE_LEVEL = [
+        ("teacher_trainee", "o'qituvchisi stajyor"),
+        ("teacher_assistant", "o'qituvchisi(assistent)"),
+        ("senior_teacher", "katta o'qituvchis"),
+        ("dotsent", "dotsent"),
+        ("professor", "professor"),
+    ]
+
+    scientific_title = models.CharField('Ilmiy unvon', max_length=255, blank=True, null=True,
+                                        choices=SCIENTIFIC_TITLE_LEVEL)
 
     def __str__(self):
         return self.full_name
@@ -124,11 +143,27 @@ class PersonalDetail(models.Model):
 
 
 class FamilyMember(models.Model):
+
+    family_relation = [
+        # turmush o'rtog'i, farzandi
+        ('turmush', 'Turmush o\'rtog\'im'),
+        ('farzand', 'Farzandim'),
+    ]
+
     employee = models.ForeignKey(Employee, related_name='family_members', on_delete=models.CASCADE)
-    full_name = models.CharField("FIO (oila a'zosi)", max_length=255)
-    date_of_birth = models.DateField("Tug'ilgan sana")
-    relationship = models.CharField("Oila a'zosi munosabati", max_length=255, default='qarindosh')
+    full_name = models.CharField("FISH (oila a'zosi)", max_length=255, help_text="Familiya Ism Sharif (passport buycha)")
+    dob = models.DateField("Tug'ilgan sana")
+    relationship = models.CharField("Qarindoshlik", max_length=20, choices=family_relation, default='turmush')
 
     class Meta:
         verbose_name = "Oila a'zosi"
         verbose_name_plural = "Oila a'zolari"
+
+    @property
+    def age(self):
+        today = date.today()
+        return today.year - self.dob.year - ((today.month, today.day) < (self.dob.month, self.dob.day))
+
+    def age_display(self):
+        return self.age
+    age_display.short_description = 'Yosh'
